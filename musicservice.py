@@ -21,6 +21,6 @@ def get_related_artists(artist_to_call):
 
     #for related_artist in json_data['similarartists']['artist']:
     #    print(artist.name + ' is similar to ' + related_artist['name'])
-            related_artist_dto = artist.make_artist(related_artist['name'], False)
+            related_artist_dto = artist.make_artist(related_artist['name'])
             response.append(related_artist_dto)
     return response

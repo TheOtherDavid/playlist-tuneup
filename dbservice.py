@@ -20,7 +20,7 @@ def get_artists_to_call():
     database_artists = client.query(query, 100)
     response = []
     for database_artist in database_artists:
-        artist_dto = artist.make_artist(database_artist.name, database_artist.called)
+        artist_dto = artist.make_artist(database_artist.name)
         response.append(artist_dto)
 
 
@@ -58,6 +58,28 @@ def update_artist_called(artist_to_update):
     client.command(query)
 
     return
+
+def shortest_path(origin_artist, target_artist):
+    query = ("SELECT count(path) FROM ("
+             "SELECT shortestPath($from, $to) AS path "
+             "LET $from = (SELECT FROM Artist WHERE name='" + _escape(origin_artist.name) + "'), "
+             "$to = (SELECT FROM Artist WHERE name='" + _escape(target_artist.name) +
+             "') UNWIND path)")
+
+    result = client.query(query)
+    if(result and result[0] is not None):
+        #Subtracting 1 because shortest_path and traverse count things slightly differently. Keeping it consistent
+        return int(result[0].oRecordData['count'])-1
+    else:
+        return None
+    
+def traverse(origin_artist, artist_to_traverse):
+    query = "SELECT $depth FROM( TRAVERSE out(similarto),in(similarto) FROM (SELECT * FROM ARTIST WHERE name='" + _escape(origin_artist.name) + "') STRATEGY BREADTH_FIRST) where name='" + _escape(artist_to_traverse.name) + "'"
+    result = client.query(query)
+    if(result and result[0] is not None):
+        return int(result[0].oRecordData['$depth'])
+    else:
+        return None
 
 def seed_db_for_test():
     print('Deleting all values in DB')

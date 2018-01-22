@@ -1,64 +1,36 @@
 import sys
+import csv
 import time
-import dbservice
-import musicservice
+import song
+import artist
+import algorithm
 
-#Re-seeding from scratch for testing purposes
-
-#dbservice.seed_db_for_test()
-
-#First we access the database and get some artist that need to be called
-artists_to_call = dbservice.get_artists_to_call()
-master_counter = 0
+start_time = time.time()
+#Testing arguments
 if len(sys.argv) >= 2:
-    max_counter = int(sys.argv[1])
-else:
-    max_counter = 300
+    arg = int(sys.argv[1])
+    print('Argument ' + str(sys.argv[1]) + ' was provided.')
 
-#Then we split that into two lists, called and toCall
-print('Making ' + str(max_counter) + ' API calls')
+#TODO: Pass in the name of the CSV file as an argument
 
-time_of_last_api_call = time.time()
+#Testing read CSV
+filename = 'trimmed-playlist.csv'
+song_list = []
+with open(filename, 'r') as file:
+    reader = csv.reader(file, delimiter='|')
+    for row in reader:
+    #Make a Song out of each row, add to list
+        song_row = song.make_song(row[0], row[1])
+        song_list.append(song_row)
 
-#Then we hit the LastFM API
+for song in song_list:
+    #Print the Songs from the Song object
+    print(song.name + ' by ' + song.artist.name)
 
-for artist in artists_to_call:
-    print(str(master_counter) + ' artists called.')
-    if master_counter >= max_counter:
-        print('Maximum number of iterations reached. Aborting.')
-        break
-    #One call per second to avoid pissing off LastFM
-    if time.time() - time_of_last_api_call < 1:
-        print(str(time_of_last_api_call - time.time()) + ' seconds elapsed. Extra sleep.')
-        time.sleep(1)
-    related_artists = musicservice.get_related_artists(artist)
-    
-    time_of_last_call = time.time
+solution = algorithm.nearest_neighbors(song_list)
 
+print('Solution found:')
+print(', '.join(str(x) for x in solution))
+print('Full solution took ' + str(time.time()-start_time))
 
-    #Now we persist any new artists and add them to the artists_to_call list
-    for related_artist in related_artists:
-        #If this artist is NOT in the DB, insert them into the DB and add them to the list
-        if not dbservice.get_artist(related_artist):
-        #if(related_artist not in called_artists and related_artist not in artists_to_call):
-            dbservice.insert_new_artist(related_artist)
-            #Not adding it to the current list anymore. This will help flesh out current DB.
-            #artists_to_call.append(related_artist)
-
-
-    #Now we persist any new edges
-        dbservice.create_new_link(artist, related_artist)
-
-    #Update artist to called in the DB
-    dbservice.update_artist_called(artist)
-
-    master_counter = master_counter + 1
-
-
-
-
-
-#Then we persist all new edges
-
-#Then we close the DB connection?
-#db.close()
+#TODO: write a new CSV file with the properly-ordered solution
