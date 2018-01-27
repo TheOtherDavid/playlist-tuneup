@@ -59,7 +59,7 @@ def update_artist_called(artist_to_update):
 
     return
 
-def shortest_path(origin_artist, target_artist):
+def get_shortest_path(origin_artist, target_artist):
     query = ("SELECT count(path) FROM ("
              "SELECT shortestPath($from, $to) AS path "
              "LET $from = (SELECT FROM Artist WHERE name='" + _escape(origin_artist.name) + "'), "
