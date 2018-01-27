@@ -16,6 +16,9 @@ class Artist(object):
 
     def __str__(self):
         return self.name
+
+    def __hash__(self):
+        return hash((self.name, self.mbid))
     
 
 def make_artist(name):
