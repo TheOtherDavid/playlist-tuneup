@@ -14,10 +14,10 @@ def init():
     client = pyorient.OrientDB("localhost", 2424)
     session_id = client.connect("root", "password")
 
-def get_artists_to_call():
+def get_artists_to_call(number_of_artists):
     print('Getting artists')
     query = 'SELECT * FROM ARTIST WHERE called=false'
-    database_artists = client.query(query, 100)
+    database_artists = client.query(query, number_of_artists)
     response = []
     for database_artist in database_artists:
         artist_dto = artist.make_artist(database_artist.name)
