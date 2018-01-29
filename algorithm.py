@@ -1,11 +1,7 @@
 import math
 import time
-import collections
-import dbservice
-
 from collections import defaultdict
-
-
+import dbservice
 
 def nearest_neighbors(song_list):
     #Do nearest neighbor algo once with each song as the lead song
@@ -23,24 +19,16 @@ def nearest_neighbors(song_list):
 
         while unplayed_songs:
             #Figure out next song by figuring out the closest song from unplayed
-            #Get a list of all the possible transitions? Lot of DB calls...
-            #Should we pre-construct a matrix?
-
-            #min(of the possible transitions from latest played to each of unplayed)
             distances = []
 
             for unplayed_song in unplayed_songs:
                 #Find the difference between the current song and the last song and add it to a list
-
                 distance = artist_dict[played_songs[-1].artist][unplayed_song.artist]
-
                 distances.append(distance)
-            #Next song is the minimum of the distances
+            #Next song is the song with the minimum distance
             min_distance = min(distances)
-            min_distance_song = unplayed_songs[distances.index(min(distances))]
-            #print('Minimum distance song is ' + min_distance_song.name + ' with a distance of ' + str(min_distance))
-            next_song = min_distance_song
-            #print('Next song is: ' + next_song.name)
+            next_song = unplayed_songs[distances.index(min_distance)]
+
             current_distance = current_distance + min_distance
             played_songs.append(next_song)
             unplayed_songs.remove(next_song)
@@ -60,9 +48,10 @@ def find_all_distances(song_list):
     artist_dict = defaultdict(dict)
     time_start = time.time()
 
-    print('Building artist dictionary.')
+    print('Building artist dictionary')
 
     for song_from in song_list:
+        #Double for-loop to compare each song to each other song
         for song_to in song_list:
             if song_from.artist != song_to.artist:
                 distance = dbservice.get_shortest_path(song_from.artist, song_to.artist)
