@@ -27,12 +27,26 @@ def get_artists_to_call(number_of_artists):
     return response
 
 def get_artist(artist_to_get):
+    """Gets an artist from the database.
+    Input: Artist object
+    Output: Artist object, or None if artist not found"""
     query = "SELECT * FROM ARTIST WHERE name = '" + _escape(artist_to_get.name) + "'"
     returned_artists = client.query(query)
     if(returned_artists and returned_artists[0] is not None):
         return returned_artists[0]
     else:
         return None
+
+def get_uncalled_related_artists_at_depth(artist_to_get, depth):
+    query = ("SELECT * FROM (TRAVERSE out(similarto),in(similarto) FROM ("
+             "SELECT * FROM ARTIST WHERE name='" + _escape(artist_to_get.name) +
+             "') MAXDEPTH " + str(depth) + " ) WHERE called=false")
+    database_artists = client.query(query)
+    response = []
+    for database_artist in database_artists:
+        artist_dto = artist.make_artist(database_artist.name)
+        response.append(artist_dto)
+    return response
 
 
 def insert_new_artist(artist_to_insert):
@@ -68,16 +82,7 @@ def get_shortest_path(origin_artist, target_artist):
 
     result = client.query(query)
     if(result and result[0] is not None):
-        #Subtracting 1 because shortest_path and traverse count things slightly differently. Keeping it consistent
-        return int(result[0].oRecordData['count'])-1
-    else:
-        return None
-    
-def traverse(origin_artist, artist_to_traverse):
-    query = "SELECT $depth FROM( TRAVERSE out(similarto),in(similarto) FROM (SELECT * FROM ARTIST WHERE name='" + _escape(origin_artist.name) + "') STRATEGY BREADTH_FIRST) where name='" + _escape(artist_to_traverse.name) + "'"
-    result = client.query(query)
-    if(result and result[0] is not None):
-        return int(result[0].oRecordData['$depth'])
+        return int(result[0].oRecordData['count'])
     else:
         return None
 
