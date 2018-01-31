@@ -4,7 +4,7 @@ import dbservice
 import musicservice
 
 
-def call_api_for_list(artists_to_call):
+def add_related_artists_for_list(artists_to_call):
     time_of_last_api_call = time.time()
     counter = 0
     for artist in artists_to_call:
@@ -36,16 +36,16 @@ def main():
 
 
     if len(sys.argv) >= 2:
-        NUMBER_OF_ARTISTS = int(sys.argv[1])
+        number_of_artists = int(sys.argv[1])
     else:
         #Default 100, put in arguments for more
-        NUMBER_OF_ARTISTS = 10
+        number_of_artists = 10
     #Call the database for the number of artists that need to be called
-    ARTISTS_TO_CALL = dbservice.get_artists_to_call(NUMBER_OF_ARTISTS)
+    artists_to_call = dbservice.get_artists_to_call(number_of_artists)
 
-    print('Making ' + str(NUMBER_OF_ARTISTS) + ' API calls')
+    print('Making ' + str(number_of_artists) + ' API calls')
 
-    call_api_for_list(ARTISTS_TO_CALL)
+    add_related_artists_for_list(artists_to_call)
 
     print('Maximum number of iterations reached. Aborting.')
 

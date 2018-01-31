@@ -95,7 +95,7 @@ def link_artist_to_database(origin_artist, target_artist):
         artists_to_call = dbservice.get_uncalled_related_artists_at_depth(origin_artist, depth)
         artists_to_call.extend(dbservice.get_uncalled_related_artists_at_depth(target_artist, depth))
 
-        db_build.call_api_for_list(artists_to_call)
+        db_build.add_related_artists_for_list(artists_to_call)
         depth += 1
 
     #While dbservice.get_shortest_path(origin_artist, target_artist) == 0
