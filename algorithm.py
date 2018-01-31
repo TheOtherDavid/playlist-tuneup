@@ -33,9 +33,9 @@ def nearest_neighbors(song_list):
             for unplayed_song in unplayed_songs:
                 #Find the difference between the current song and the last song and add it to a list
                 distance = artist_dict[played_songs[-1].artist][unplayed_song.artist]
-                
+
                 distances.append(distance)
-                
+
             #Next song is the song with the minimum distance
             min_distance = min(distances)
             next_song = unplayed_songs[distances.index(min_distance)]
@@ -68,12 +68,8 @@ def find_all_distances(song_list):
         for song_to in song_list:
             if song_from.artist != song_to.artist:
                 #Try to find a path between artists.
-                try:
-                    distance = dbservice.get_shortest_path(song_from.artist, song_to.artist)
-                except:
-                    print('Artist not found in database. Adding and linking.')
-                    link_artist_to_database(song_from.artist, song_to.artist)
-                    distance = dbservice.get_shortest_path(song_from.artist, song_to.artist)
+
+                distance = dbservice.get_shortest_path(song_from.artist, song_to.artist)
 
                 if distance == 0:
                     print('Artist not linked to bulk of database. Adding links.')
@@ -88,8 +84,8 @@ def link_artist_to_database(origin_artist, target_artist):
     """When an artist is found to not be linked to another artist, this function
     will call the db-build function to connect the artists."""
 
-    #While loop: While shortest_path not found, get all related artist at a certain depth, 
-    #and make API calls for those artists. This could take a while, but a link SHOULD be found. Eventually.
+    #While loop: While shortest_path not found, get all related artist at a certain depth,
+    #and make API calls for those artists. This could take a while, but a link SHOULD be found.
     depth = 1
     while True:
         #Break if shortest path is not 0, IE if a link is found
@@ -103,7 +99,7 @@ def link_artist_to_database(origin_artist, target_artist):
         depth += 1
 
     #While dbservice.get_shortest_path(origin_artist, target_artist) == 0
-    
+
 def verify_and_add_artists(song_list):
     for song in song_list:
         artist = dbservice.get_artist(song.artist)
