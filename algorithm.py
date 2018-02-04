@@ -74,9 +74,13 @@ def find_all_distances(song_list):
                 if distance == 0:
                     print('Artist not linked to bulk of database. Adding links.')
                     link_artist_to_database(song_from.artist, song_to.artist)
+                    print('Artist successfully linked to database')
                     distance = dbservice.get_shortest_path(song_from.artist, song_to.artist)
 
                 artist_dict[song_from.artist][song_to.artist] = distance
+            else:
+                #If both artists are the same just make it zero. Come up with a better solution later.
+                artist_dict[song_from.artist][song_to.artist] = 0
     print('Building artist dictionary took '  + str(time.time() - time_start))
     return artist_dict
 
@@ -98,7 +102,6 @@ def link_artist_to_database(origin_artist, target_artist):
         db_build.add_related_artists_for_list(artists_to_call)
         depth += 1
 
-    #While dbservice.get_shortest_path(origin_artist, target_artist) == 0
 
 def verify_and_add_artists(song_list):
     for song in song_list:
