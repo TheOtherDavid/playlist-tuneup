@@ -97,7 +97,7 @@ def link_artist_to_database(origin_artist, target_artist):
             break
         print('Making API calls for depth ' + str(depth))
         artists_to_call = dbservice.get_uncalled_related_artists_at_depth(origin_artist, depth)
-        artists_to_call.extend(dbservice.get_uncalled_related_artists_at_depth(target_artist, depth))
+        artists_to_call.extend(dbservice.get_uncalled_related_artists_at_depth(target_artist, depth))          
 
         db_build.add_related_artists_for_list(artists_to_call)
         depth += 1
@@ -109,3 +109,4 @@ def verify_and_add_artists(song_list):
         if artist is None:
             print("Artist " + song.artist.name + " not found, adding to database.")
             dbservice.insert_new_artist(song.artist)
+            db_build.add_related_artists_for_list([song.artist])

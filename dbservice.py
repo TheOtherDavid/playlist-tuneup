@@ -1,12 +1,28 @@
 import pyorient
 import artist
 import json
+
+from credentials import ORIENT_USER_ID
+from credentials import ORIENT_PASSWORD
+
 def _escape(string):
     return string.replace("'","\\'")
 
 client = pyorient.OrientDB("localhost", 2424)
-session_id = client.connect("root", "password")
-client.db_open("musicartists", "root", "password")
+session_id = client.connect(ORIENT_USER_ID, ORIENT_PASSWORD)
+if client.db_exists("MusicArtists"):
+    client.db_open("MusicArtists", ORIENT_USER_ID, ORIENT_PASSWORD)
+    print('Connected to database MusicArtists')
+else:
+    print('Database MusicArtists not found. Creating database.')
+    client.db_create("MusicArtists")
+    client.db_open("MusicArtists", ORIENT_USER_ID, ORIENT_PASSWORD)
+    create_artist_query = 'CREATE CLASS ARTIST EXTENDS V'
+    client.command(create_artist_query)
+    create_similar_to_query = 'CREATE CLASS SIMILARTO EXTENDS E'
+    client.command(create_similar_to_query)
+
+    
 
 
 
@@ -16,7 +32,7 @@ def init():
 
 def get_artists_to_call(number_of_artists):
     print('Getting artists')
-    query = 'SELECT * FROM ARTIST WHERE called=false'
+    query = 'SELECT * FROM ARTIST WHERE called = 0'
     database_artists = client.query(query, number_of_artists)
     response = []
     for database_artist in database_artists:
@@ -40,12 +56,13 @@ def get_artist(artist_to_get):
 def get_uncalled_related_artists_at_depth(artist_to_get, depth):
     query = ("SELECT * FROM (TRAVERSE out(similarto),in(similarto) FROM ("
              "SELECT * FROM ARTIST WHERE name='" + _escape(artist_to_get.name) +
-             "') MAXDEPTH " + str(depth) + " ) WHERE called=false")
+             "') MAXDEPTH " + str(depth) + " ) WHERE called = 0")
     database_artists = client.query(query)
     response = []
     for database_artist in database_artists:
         artist_dto = artist.make_artist(database_artist.name)
-        response.append(artist_dto)
+        if artist_dto not in response:
+            response.append(artist_dto)
     return response
 
 
@@ -62,7 +79,7 @@ def insert_new_artist(artist_to_insert):
 def create_new_link(origin_artist, related_artist):
     print('New Link: ' + origin_artist.name + ' to ' + related_artist.name)
 
-    query = "CREATE EDGE similarto FROM (SELECT * FROM ARTIST WHERE name='" + _escape(origin_artist.name) + "') TO (SELECT * FROM ARTIST WHERE name='" + _escape(related_artist.name) + "')"
+    query = "CREATE EDGE SIMILARTO FROM (SELECT * FROM ARTIST WHERE name='" + _escape(origin_artist.name) + "') TO (SELECT * FROM ARTIST WHERE name='" + _escape(related_artist.name) + "')"
     client.command(query)
 
     return
